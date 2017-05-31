@@ -1,0 +1,159 @@
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+<body onload="init();">
+  <canvas id="demoCanvas" width="500" height="300"></canvas>
+</body>
+
+<script>
+var stage;
+var screenSize = [500,300];
+var sunPos = [screenSize[0]/2 - 99/2, screenSize[1]/2 - 99/2];
+var numStars = 30;
+var earthStruct = {keyframes: [sunPos[0]+162, sunPos[1], sunPos[0], sunPos[1], sunPos[0]-162, sunPos[1]], dir: "left"};	//keyframes=what point will it visit
+																			//dir= is it going to the left or right
+
+  function init() {
+    stage = new createjs.Stage("demoCanvas");
+	//add the background
+	stage.addChild(createSpace());
+	//add some stars
+	for(var i = 0; i < numStars; i++){
+		stage.addChild(createStar());
+	}
+	stage.addChild(createSun());
+	stage.addChild(createEarth());
+	
+	handleTick();
+  }
+  
+  
+  function handleTick() {
+	var earth = stage.getChildByName("earth");
+	
+	createjs.Tween.get(earth, {loop: true})
+		.to({
+			x: earthStruct.keyframes[2] -16, 
+			y: earthStruct.keyframes[3] -16, 
+			scaleX: 3, 
+			scaleY: 3}, 	2000, createjs.Ease.getPowIn(2))
+		.to({
+			x: earthStruct.keyframes[4], 
+			y: earthStruct.keyframes[5], 
+			scaleX: 1, 
+			scaleY: 1}, 	2000, createjs.Ease.getPowOut(2))
+		.call(changeZIndex)
+		.to({
+			x: earthStruct.keyframes[2]+48, 
+			y: earthStruct.keyframes[3]+48,
+			scaleX: 0.5, 
+			scaleY: 0.5}, 	2000, createjs.Ease.getPowIn(2))
+		.to({
+			x: earthStruct.keyframes[0], 
+			y: earthStruct.keyframes[1], 
+			scaleX: 1, 
+			scaleY: 1},		2000, createjs.Ease.getPowOut(2))
+		.call(changeZIndex);
+	createjs.Ticker.on("tick", stage);
+	createjs.Ticker.framerate = 11;
+  }
+  
+  function createStar(){
+	var x = randomNo(1, 500);
+	var y = randomNo(1, 300);
+	var size = randomNo(7, 9);
+	var star = new createjs.Shape();
+	if(size==9){
+		star.graphics.beginFill("#ffff99").drawRect(x, y, size, size);
+	}
+	else if(size==8){
+		star.graphics.beginFill("#f4fa7b").drawRect(x, y, size, size);
+	}
+	else{
+		star.graphics.beginFill("#e6e65c").drawRect(x, y, size, size);
+	}
+	
+	//stage.setChildIndex(star, 2);
+	star.snapToPixel = true;
+	star.cache(x, y, size, size);
+	return star;
+  }
+  
+  function createSun() {
+  /* glows/shadows dont work in chrome so I am using a png image for the moment
+  
+	var sun = new createjs.Shape();
+	sun.graphics.beginFill("#e6e45b").drawRect(200, 100, 70, 70);
+	return sun;
+	*/
+	
+	var sun = new createjs.Bitmap("sun.png");
+	sun.x = sunPos[0];
+	sun.y = sunPos[1];
+	sun.name = "sun";
+	//sun.regX = sun.regY = 99/2;
+	sun.snapToPixel = true;
+	return sun;
+  }
+  
+  function createEarth() {
+	//load in sprite sheet
+	var data = new createjs.SpriteSheet({
+	"images": ["earth.png"],
+	"frames": {"regX": 0, "height": 32, "count": 8, "regY": 0, "width": 32},
+	"animations": {"spin": [0, 6]}
+	});
+	var earth = new createjs.Sprite(data, "spin");
+	
+	earth.play();
+	
+	//add moon
+	var moon = new createjs.Bitmap("moon.png");
+	moon.x = 36;
+	moon.y = -4;
+	
+	
+	//stage.setChildIndex(sun, 3);
+	moon.snapToPixel = true;
+	
+	
+	//add earth to a container
+	var earthContainer = new createjs.Container();
+	earthContainer.addChild(earth);
+	earthContainer.addChild(moon);
+	earthContainer.x = earthStruct.keyframes[0];
+	earthContainer.y = earthStruct.keyframes[1];
+	earthContainer.regX = -10;
+	earthContainer.regY = -8;
+	//stage.setChildIndex(earthContainer, 4);
+	earthContainer.snapToPixel = true;
+	earthContainer.name = "earth";
+	
+	return earthContainer;
+	
+  }
+  
+  function createSpace(){
+	var space = new createjs.Shape();
+	space.graphics.beginFill("#171738").drawRect(0,0,screenSize[0], screenSize[1]);
+	//stage.setChildIndex(space, 1);
+	return space;
+  }
+  
+  function changeZIndex(){
+	var earth = stage.getChildByName("earth");
+	var sun = stage.getChildByName("sun");
+	
+	if(earthStruct.dir == "left"){
+		stage.setChildIndex(earth, numStars+1);
+		earthStruct.dir = "right";
+	}
+	else{
+		stage.setChildIndex(earth, numStars+2);
+		earthStruct.dir = "left";
+	}
+  }
+  
+  function randomNo(a,b){
+	return Math.floor((Math.random() * b) + a);
+  }
+ 
+</script>
