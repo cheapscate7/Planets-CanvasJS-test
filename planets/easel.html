@@ -8,7 +8,7 @@ var stage;
 var screenSize = [500,300];
 var sunPos = [screenSize[0]/2 - 99/2, screenSize[1]/2 - 99/2];
 var numStars = 30;
-var earthStruct = {keyframes: [sunPos[0]+162, sunPos[1], sunPos[0], sunPos[1], sunPos[0]-162, sunPos[1]], dir: "left"};	//keyframes=what point will it visit
+var earthStruct = {keyframes: [sunPos[0]+162, sunPos[1], sunPos[0], sunPos[1]-5, sunPos[0]-162, sunPos[1] + 62], dir: "left"};	//keyframes=what point will it visit
 																			//dir= is it going to the left or right
 
   function init() {
